@@ -6,12 +6,14 @@ from .polynomial import Polynomial
 from .mod_arith import ModArith
 from .rns import RNS
 from .mgmt import MGMT
+from .orion import Orion
 
 __all__ = [
     'CKKS',
-    'LWE', 
-    'Polynomial',
-    'ModArith',
-    'RNS',
+    'LWE',
     'MGMT',
+    'ModArith',
+    'Orion',
+    'Polynomial',
+    'RNS',
 ]
