@@ -217,6 +217,11 @@ class CKKSPlaintextHandler(BaseOperationHandler):
             return current_value
 
         print("✅ Found plaintext operand")
+        print(f"    Operation metadata: {operation.metadata}")
+
+        # Extract Orion metadata
+        orion_metadata = self._extract_orion_metadata(operation, type_builder)
+        # FIXME: determine if this is a bias and should be extracted into a function arg
 
         # Create the operation
         op_instance = self.op_class(
