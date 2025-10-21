@@ -37,7 +37,7 @@ from .lwe_traits import (
     SameOperandsAndResultPlaintextTypes,
     AllCiphertextTypesMatch,
     IsCiphertextPlaintextOp,
-    AllTypesMatch
+    AllTypesMatch,
 )
 
 
@@ -161,7 +161,9 @@ class AddOp(IRDLOperation):
         SameOperandsAndResultPlaintextTypes(),
     )
 
-    assembly_format = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    assembly_format = (
+        "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    )
 
 
 @irdl_op_definition
@@ -184,7 +186,9 @@ class SubOp(IRDLOperation):
         SameOperandsAndResultPlaintextTypes(),
     )
 
-    assembly_format = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    assembly_format = (
+        "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    )
 
 
 @irdl_op_definition
@@ -201,12 +205,10 @@ class MulOp(IRDLOperation):
     rhs = operand_def(LWECiphertextType)
     result = result_def(LWECiphertextType)
 
-    traits = traits_def(
-        Pure(),
-        Commutative(),
-        SameOperandsAndResultRings()
+    traits = traits_def(Pure(), Commutative(), SameOperandsAndResultRings())
+    assembly_format = (
+        "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
     )
-    assembly_format = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
 
 
 @irdl_op_definition
@@ -252,7 +254,9 @@ class AddPlainOp(IRDLOperation):
         SameOperandsAndResultPlaintextTypes(),  # Derived plaintext types match
     )
 
-    assembly_format = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    assembly_format = (
+        "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    )
 
 
 @irdl_op_definition
@@ -271,7 +275,9 @@ class SubPlainOp(IRDLOperation):
 
     traits = traits_def(Pure())
 
-    assembly_format = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    assembly_format = (
+        "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    )
 
 
 @irdl_op_definition
@@ -294,7 +300,9 @@ class MulPlainOp(IRDLOperation):
         IsCiphertextPlaintextOp(),  # Ensures one ciphertext + one plaintext
     )
 
-    assembly_format = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    assembly_format = (
+        "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($result)"
+    )
 
 
 @irdl_op_definition

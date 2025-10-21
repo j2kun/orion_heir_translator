@@ -34,14 +34,16 @@ class OrionHeirDriver:
         self.translator = GenericTranslator()
 
         if verbose:
-            setup_logging('DEBUG')
+            setup_logging("DEBUG")
         else:
-            setup_logging('INFO')
+            setup_logging("INFO")
 
-    def translate_from_operations(self,
-                                 operations: List[Any],
-                                 config_path: Optional[Path] = None,
-                                 function_name: str = "fhe_computation") -> str:
+    def translate_from_operations(
+        self,
+        operations: List[Any],
+        config_path: Optional[Path] = None,
+        function_name: str = "fhe_computation",
+    ) -> str:
         """
         Translate Orion operations to HEIR MLIR.
 
@@ -77,10 +79,12 @@ class OrionHeirDriver:
         print("✅ Translation completed successfully")
         return output
 
-    def translate_from_file(self,
-                           input_path: Path,
-                           config_path: Optional[Path] = None,
-                           function_name: str = "fhe_computation") -> str:
+    def translate_from_file(
+        self,
+        input_path: Path,
+        config_path: Optional[Path] = None,
+        function_name: str = "fhe_computation",
+    ) -> str:
         """
         Translate operations from input file.
 
@@ -122,10 +126,10 @@ class OrionHeirDriver:
         """Load operations from various file formats."""
         suffix = file_path.suffix.lower()
 
-        with open(file_path, 'r') as f:
-            if suffix == '.json':
+        with open(file_path, "r") as f:
+            if suffix == ".json":
                 data = json.load(f)
-            elif suffix in ['.yaml', '.yml']:
+            elif suffix in [".yaml", ".yml"]:
                 data = yaml.safe_load(f)
             else:
                 # Try to parse as text
@@ -137,8 +141,8 @@ class OrionHeirDriver:
         if isinstance(data, list):
             return data
         elif isinstance(data, dict):
-            if 'operations' in data:
-                return data['operations']
+            if "operations" in data:
+                return data["operations"]
             else:
                 return [data]
         else:
@@ -146,27 +150,45 @@ class OrionHeirDriver:
 
 
 @click.command()
-@click.option('--input', '-i', 'input_path', type=click.Path(exists=True, path_type=Path),
-              help='Input file containing Orion operations (JSON, YAML, or text)')
-@click.option('--output', '-o', 'output_path', type=click.Path(path_type=Path),
-              help='Output file for HEIR MLIR (default: stdout)')
-@click.option('--config', '-c', 'config_path', type=click.Path(exists=True, path_type=Path),
-              help='Configuration file with scheme parameters')
-@click.option('--function-name', '-f', default='fhe_computation',
-              help='Name for the generated function (default: fhe_computation)')
-@click.option('--example', is_flag=True,
-              help='Generate and translate sample MLP operations')
-@click.option('--verbose', '-v', is_flag=True,
-              help='Enable verbose output')
-@click.option('--validate', is_flag=True,
-              help='Validate the generated MLIR (requires HEIR tools)')
-def main(input_path: Optional[Path],
-         output_path: Optional[Path],
-         config_path: Optional[Path],
-         function_name: str,
-         example: bool,
-         verbose: bool,
-         validate: bool):
+@click.option(
+    "--input",
+    "-i",
+    "input_path",
+    type=click.Path(exists=True, path_type=Path),
+    help="Input file containing Orion operations (JSON, YAML, or text)",
+)
+@click.option(
+    "--output",
+    "-o",
+    "output_path",
+    type=click.Path(path_type=Path),
+    help="Output file for HEIR MLIR (default: stdout)",
+)
+@click.option(
+    "--config",
+    "-c",
+    "config_path",
+    type=click.Path(exists=True, path_type=Path),
+    help="Configuration file with scheme parameters",
+)
+@click.option(
+    "--function-name",
+    "-f",
+    default="fhe_computation",
+    help="Name for the generated function (default: fhe_computation)",
+)
+@click.option("--example", is_flag=True, help="Generate and translate sample MLP operations")
+@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
+@click.option("--validate", is_flag=True, help="Validate the generated MLIR (requires HEIR tools)")
+def main(
+    input_path: Optional[Path],
+    output_path: Optional[Path],
+    config_path: Optional[Path],
+    function_name: str,
+    example: bool,
+    verbose: bool,
+    validate: bool,
+):
     """
     Translate Orion FHE operations to HEIR MLIR format.
 
@@ -228,6 +250,7 @@ def main(input_path: Optional[Path],
         print(f"❌ Error: {e}")
         if verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
@@ -281,32 +304,37 @@ def cli():
 
 
 @cli.command()
-@click.option('--output', '-o', type=click.Path(path_type=Path), default='sample_config.yml',
-              help='Output path for sample configuration')
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    default="sample_config.yml",
+    help="Output path for sample configuration",
+)
 def create_config(output: Path):
     """Create a sample configuration file."""
     config = {
-        'ckks_params': {
-            'LogN': [13],
-            'LogQ': [55, 45, 45, 55],
-            'LogP': [55],
-            'LogScale': 45,
-            'H': 192,
-            'RingType': 'standard'
+        "ckks_params": {
+            "LogN": [13],
+            "LogQ": [55, 45, 45, 55],
+            "LogP": [55],
+            "LogScale": 45,
+            "H": 192,
+            "RingType": "standard",
         },
-        'orion': {
-            'margin': 2,
-            'embedding_method': 'hybrid',
-            'backend': 'lattigo',
-            'fuse_modules': True,
-            'debug': False,
-            'diags_path': '',
-            'keys_path': '',
-            'io_mode': 'none'
-        }
+        "orion": {
+            "margin": 2,
+            "embedding_method": "hybrid",
+            "backend": "lattigo",
+            "fuse_modules": True,
+            "debug": False,
+            "diags_path": "",
+            "keys_path": "",
+            "io_mode": "none",
+        },
     }
 
-    with open(output, 'w') as f:
+    with open(output, "w") as f:
         yaml.dump(config, f, default_flow_style=False, indent=2)
 
     print(f"📄 Sample configuration created at {output}")
@@ -327,16 +355,18 @@ def info():
     # Check dependencies
     try:
         import orion
+
         print("✅ Orion FHE library available")
     except ImportError:
         print("⚠️ Orion FHE library not available")
 
     try:
         from xdsl import __version__
+
         print(f"✅ xDSL version: {__version__}")
     except:
         print("✅ xDSL available")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

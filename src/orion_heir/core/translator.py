@@ -48,10 +48,12 @@ class GenericTranslator:
         for dialect in dialects:
             self.context.load_dialect(dialect)
 
-    def translate(self,
-                  operations: List[FHEOperation],
-                  scheme_params: SchemeParameters,
-                  function_name: str = "fhe_computation") -> ModuleOp:
+    def translate(
+        self,
+        operations: List[FHEOperation],
+        scheme_params: SchemeParameters,
+        function_name: str = "fhe_computation",
+    ) -> ModuleOp:
         """
         Translate a list of FHE operations to HEIR MLIR.
 
@@ -83,18 +85,18 @@ class GenericTranslator:
         print("✅ Translation completed")
         return module
 
-    def _create_module(self, scheme_params: SchemeParameters,
-                      type_builder: TypeBuilder) -> ModuleOp:
+    def _create_module(
+        self, scheme_params: SchemeParameters, type_builder: TypeBuilder
+    ) -> ModuleOp:
         """Create the top-level MLIR module with scheme attributes."""
         # Create module attributes based on scheme parameters
         attributes = type_builder.create_module_attributes()
 
         return ModuleOp([], attributes)
 
-    def _create_function(self,
-                               operations: List[FHEOperation],
-                               type_builder: TypeBuilder,
-                               function_name: str) -> FuncOp:
+    def _create_function(
+        self, operations: List[FHEOperation], type_builder: TypeBuilder, function_name: str
+    ) -> FuncOp:
         """Create a function with simple sequential operation processing."""
 
         # Setup function
@@ -120,19 +122,22 @@ class GenericTranslator:
 
             # Process operation
             try:
-                result = handler.handle(operation, current_value, entry_block, constants, type_builder)
+                result = handler.handle(
+                    operation, current_value, entry_block, constants, type_builder
+                )
 
                 # Store result by operation name
                 if operation.result_var:
                     constants[operation.result_var] = result
 
                 # Update current value only for non-encode operations
-                if operation.op_type != 'encode':
+                if operation.op_type != "encode":
                     current_value = result
 
             except Exception as e:
                 print(f"❌ Error processing {operation.op_type}: {e}")
                 import traceback
+
                 traceback.print_exc()
 
         # Finish function
@@ -148,13 +153,13 @@ class TranslatorBuilder:
     def __init__(self):
         self.translator = GenericTranslator()
 
-    def with_custom_operations(self, operations: Dict[str, Any]) -> 'TranslatorBuilder':
+    def with_custom_operations(self, operations: Dict[str, Any]) -> "TranslatorBuilder":
         """Add custom operation handlers."""
         for op_name, handler in operations.items():
             self.translator.operation_registry.register_operation(op_name, handler)
         return self
 
-    def with_frontend(self, frontend: FrontendInterface) -> 'TranslatorBuilder':
+    def with_frontend(self, frontend: FrontendInterface) -> "TranslatorBuilder":
         """Configure with a specific frontend."""
         self.frontend = frontend
         return self
