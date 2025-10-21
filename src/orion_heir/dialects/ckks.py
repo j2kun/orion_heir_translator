@@ -27,7 +27,7 @@ from xdsl.printer import Printer
 from xdsl.traits import Pure, Commutative
 
 # Import our custom dialects - this ensures they are loaded when CKKS is loaded
-from .lwe import LWE, NewLWECiphertextType, NewLWEPlaintextType
+from .lwe import LWE, LWECiphertextType, LWEPlaintextType
 from .polynomial import RingAttr
 from .mod_arith import ModArith
 from .rns import RNS
@@ -150,9 +150,9 @@ class AddOp(IRDLOperation):
 
     name = "ckks.add"
 
-    lhs = operand_def(NewLWECiphertextType)
-    rhs = operand_def(NewLWECiphertextType)
-    result = result_def(NewLWECiphertextType)
+    lhs = operand_def(LWECiphertextType)
+    rhs = operand_def(LWECiphertextType)
+    result = result_def(LWECiphertextType)
 
     traits = traits_def(
         Pure(),
@@ -174,9 +174,9 @@ class SubOp(IRDLOperation):
 
     name = "ckks.sub"
 
-    lhs = operand_def(NewLWECiphertextType)
-    rhs = operand_def(NewLWECiphertextType)
-    result = result_def(NewLWECiphertextType)
+    lhs = operand_def(LWECiphertextType)
+    rhs = operand_def(LWECiphertextType)
+    result = result_def(LWECiphertextType)
 
     traits = traits_def(
         Pure(),
@@ -197,9 +197,9 @@ class MulOp(IRDLOperation):
 
     name = "ckks.mul"
 
-    lhs = operand_def(NewLWECiphertextType)
-    rhs = operand_def(NewLWECiphertextType)
-    result = result_def(NewLWECiphertextType)
+    lhs = operand_def(LWECiphertextType)
+    rhs = operand_def(LWECiphertextType)
+    result = result_def(LWECiphertextType)
 
     traits = traits_def(
         Pure(),
@@ -218,7 +218,7 @@ class NegateOp(IRDLOperation):
     """
 
     name = "ckks.negate"
-    T: ClassVar = VarConstraint("T", BaseAttr(NewLWECiphertextType))
+    T: ClassVar = VarConstraint("T", BaseAttr(LWECiphertextType))
 
     input = operand_def(T)
     result = result_def(T)
@@ -240,9 +240,9 @@ class AddPlainOp(IRDLOperation):
 
     name = "ckks.add_plain"
 
-    lhs = operand_def(NewLWECiphertextType)
-    rhs = operand_def(NewLWEPlaintextType)
-    result = result_def(NewLWECiphertextType)
+    lhs = operand_def(LWECiphertextType)
+    rhs = operand_def(LWEPlaintextType)
+    result = result_def(LWECiphertextType)
 
     traits = traits_def(
         Pure(),
@@ -265,9 +265,9 @@ class SubPlainOp(IRDLOperation):
 
     name = "ckks.sub_plain"
 
-    lhs = operand_def(NewLWECiphertextType)
-    rhs = operand_def(NewLWEPlaintextType)
-    result = result_def(NewLWECiphertextType)
+    lhs = operand_def(LWECiphertextType)
+    rhs = operand_def(LWEPlaintextType)
+    result = result_def(LWECiphertextType)
 
     traits = traits_def(Pure())
 
@@ -284,9 +284,9 @@ class MulPlainOp(IRDLOperation):
 
     name = "ckks.mul_plain"
 
-    lhs = operand_def(NewLWECiphertextType)
-    rhs = operand_def(NewLWEPlaintextType)
-    result = result_def(NewLWECiphertextType)
+    lhs = operand_def(LWECiphertextType)
+    rhs = operand_def(LWEPlaintextType)
+    result = result_def(LWECiphertextType)
 
     traits = traits_def(
         Pure(),
@@ -307,8 +307,8 @@ class RelinearizeOp(IRDLOperation):
 
     name = "ckks.relinearize"
 
-    input = operand_def(NewLWECiphertextType)
-    result = result_def(NewLWECiphertextType)
+    input = operand_def(LWECiphertextType)
+    result = result_def(LWECiphertextType)
 
     from_basis = prop_def(DenseArrayBase)
     to_basis = prop_def(DenseArrayBase)
@@ -333,8 +333,8 @@ class RescaleOp(IRDLOperation):
 
     name = "ckks.rescale"
 
-    input = operand_def(NewLWECiphertextType)
-    result = result_def(NewLWECiphertextType)
+    input = operand_def(LWECiphertextType)
+    result = result_def(LWECiphertextType)
 
     to_ring = prop_def(RingAttr)  # Now properly typed as RingAttr
 
@@ -355,7 +355,7 @@ class RotateOp(IRDLOperation):
     name = "ckks.rotate"
 
     # Define the type variable as a class variable
-    T: ClassVar = VarConstraint("T", BaseAttr(NewLWECiphertextType))
+    T: ClassVar = VarConstraint("T", BaseAttr(LWECiphertextType))
 
     input = operand_def(T)
     result = result_def(T)  # Same type as input - this allows inference
@@ -386,13 +386,13 @@ class BootstrapOp(IRDLOperation):
     2. Re-encrypt with fresh noise and full level
     3. Return refreshed ciphertext
 
-    Example: %refreshed = ckks.bootstrap %input : !lwe.new_lwe_ciphertext -> !lwe.new_lwe_ciphertext
+    Example: %refreshed = ckks.bootstrap %input : !lwe.lwe_ciphertext -> !lwe.lwe_ciphertext
     """
 
     name = "ckks.bootstrap"
 
-    input = operand_def(NewLWECiphertextType)
-    result = result_def(NewLWECiphertextType)
+    input = operand_def(LWECiphertextType)
+    result = result_def(LWECiphertextType)
 
     traits = traits_def(Pure())
 

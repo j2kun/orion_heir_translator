@@ -20,7 +20,7 @@ from xdsl.irdl import (
 from xdsl.traits import Pure
 
 # Ensure LWE is loaded
-from .lwe import NewLWECiphertextType, NewLWEPlaintextType
+from .lwe import LWECiphertextType, LWEPlaintextType
 
 
 @irdl_op_definition
@@ -37,9 +37,9 @@ class LinearTransformOp(IRDLOperation):
 
     name = "orion.linear_transform"
 
-    input = operand_def(NewLWECiphertextType)
-    weights = operand_def(base(TensorType[NewLWEPlaintextType]))
-    result = result_def(NewLWECiphertextType)
+    input = operand_def(LWECiphertextType)
+    weights = operand_def(base(TensorType[LWEPlaintextType]))
+    result = result_def(LWECiphertextType)
 
     traits = traits_def(Pure())
 
@@ -77,7 +77,7 @@ class ChebyshevOp(IRDLOperation):
     name = "orion.chebyshev"
 
     # Input ciphertext to evaluate polynomial on
-    input = operand_def(NewLWECiphertextType)
+    input = operand_def(LWECiphertextType)
 
     # Chebyshev polynomial coefficients (required)
     coefficients = prop_def(ArrayAttr[FloatAttr])
@@ -87,7 +87,7 @@ class ChebyshevOp(IRDLOperation):
     domain_end = prop_def(FloatAttr, default=FloatAttr(1.0, f64))
 
     # Result ciphertext
-    result = result_def(NewLWECiphertextType)
+    result = result_def(LWECiphertextType)
 
     irdl_options = [ParsePropInAttrDict()]
     assembly_format = "$input attr-dict `:` `(` type($input)  `)` `->` type($result)"

@@ -264,15 +264,15 @@ class ApplicationDataAttr(ParametrizedAttribute):
         printer.print_string(">")
 
 @irdl_attr_definition
-class NewLWEPlaintextType(ParametrizedAttribute, TypeAttribute):
+class LWEPlaintextType(ParametrizedAttribute, TypeAttribute):
     """
     A type representing LWE plaintexts.
 
-    Syntax: !lwe.new_lwe_plaintext<application_data = app_data, plaintext_space = space>
-    Example: !lwe.new_lwe_plaintext<application_data = <message_type = i3>, plaintext_space = #plaintext_space>
+    Syntax: !lwe.lwe_plaintext<application_data = app_data, plaintext_space = space>
+    Example: !lwe.lwe_plaintext<application_data = <message_type = i3>, plaintext_space = #plaintext_space>
     """
 
-    name = "lwe.new_lwe_plaintext"
+    name = "lwe.lwe_plaintext"
 
     application_data: ParameterDef[ApplicationDataAttr]
     plaintext_space: ParameterDef[PlaintextSpaceAttr]
@@ -310,15 +310,15 @@ class NewLWEPlaintextType(ParametrizedAttribute, TypeAttribute):
 
 
 @irdl_attr_definition
-class NewLWECiphertextType(ParametrizedAttribute, TypeAttribute):
+class LWECiphertextType(ParametrizedAttribute, TypeAttribute):
     """
     A type representing LWE ciphertexts.
 
-    Syntax: !lwe.new_lwe_ciphertext<application_data = app_data, plaintext_space = space,
+    Syntax: !lwe.lwe_ciphertext<application_data = app_data, plaintext_space = space,
                                    ciphertext_space = c_space, key = key_attr, modulus_chain = chain>
     """
 
-    name = "lwe.new_lwe_ciphertext"
+    name = "lwe.lwe_ciphertext"
 
     application_data: ParameterDef[ApplicationDataAttr]
     plaintext_space: ParameterDef[PlaintextSpaceAttr]
@@ -415,7 +415,7 @@ class RLWEEncodeOp(IRDLOperation):
 
     # Operands - allow tensors, integers, or floats
     input = operand_def(TensorType)
-    output = result_def(NewLWEPlaintextType)
+    output = result_def(LWEPlaintextType)
 
     # Attributes
     encoding = attr_def(InverseCanonicalEncodingAttr)
@@ -440,7 +440,7 @@ LWE = Dialect(
         PlaintextSpaceAttr,
         CiphertextSpaceAttr,
         ApplicationDataAttr,
-        NewLWEPlaintextType,
-        NewLWECiphertextType,
+        LWEPlaintextType,
+        LWECiphertextType,
     ],
 )
