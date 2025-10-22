@@ -955,7 +955,7 @@ class ChebyshevHandler(BaseOperationHandler):
         )
 
         block.add_op(cheby_op)
-        print("✅ Created ckks.chebyshev operation")
+        print("✅ Created orion.chebyshev operation")
 
         # Store result
         if operation.result_var:

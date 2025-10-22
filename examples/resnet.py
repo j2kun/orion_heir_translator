@@ -4,7 +4,7 @@ Orion ResNet Demo - Complete ResNet pipeline following the MLP example pattern.
 
 This demonstrates a complete ResNet workflow:
 1. Create a ResNet model using Orion's design (embedded in this file)
-2. Run cleartext inference  
+2. Run cleartext inference
 3. Use Orion to compile the model (orion.fit + orion.compile)
 4. Extract operations via OrionFrontend
 5. Translate to HEIR MLIR for OpenFHE compilation
@@ -46,14 +46,14 @@ class BasicBlock(on.Module):
         self.conv2 = on.Conv2d(Co, Co, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn2   = on.BatchNorm2d(Co)
         self.act2  = on.ReLU()
-       
+
         self.add = on.Add()
         self.shortcut = nn.Sequential()
         if stride != 1 or Ci != self.expansion*Co:
             self.shortcut = nn.Sequential(
                 on.Conv2d(Ci, self.expansion*Co, kernel_size=1, stride=stride, bias=False),
                 on.BatchNorm2d(self.expansion*Co))
-  
+
     def forward(self, x):
         out = self.act1(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
@@ -67,15 +67,15 @@ class Bottleneck(on.Module):
         super().__init__()
         self.conv1 = on.Conv2d(Ci, Co, kernel_size=1, bias=False)
         self.bn1   = on.BatchNorm2d(Co)
-        self.act1  = on.SiLU(degree=127) 
+        self.act1  = on.SiLU(degree=127)
 
         self.conv2 = on.Conv2d(Co, Co, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn2   = on.BatchNorm2d(Co)
-        self.act2  = on.SiLU(degree=127)  
+        self.act2  = on.SiLU(degree=127)
 
         self.conv3 = on.Conv2d(Co, Co*self.expansion, kernel_size=1, stride=1, bias=False)
         self.bn3   = on.BatchNorm2d(Co*self.expansion)
-        self.act3  = on.SiLU(degree=127)  
+        self.act3  = on.SiLU(degree=127)
 
         self.add = on.Add()
         self.shortcut = nn.Sequential()
@@ -105,13 +105,13 @@ class ResNet(on.Module):
         self.pool = nn.Identity()
         if dataset == 'imagenet': # for imagenet we must also downsample
             self.pool = on.AvgPool2d(kernel_size=3, stride=2, padding=1)
-        
+
         self.layers = nn.ModuleList()
         for i in range(len(num_blocks)):
             stride = 1 if i == 0 else 2
             self.layers.append(self.layer(block, num_chans[i], num_blocks[i], stride))
 
-        self.avgpool = on.AdaptiveAvgPool2d(output_size=(1,1)) 
+        self.avgpool = on.AdaptiveAvgPool2d(output_size=(1,1))
         self.flatten = on.Flatten()
         self.linear  = on.Linear(self.last_chans * block.expansion, num_classes)
 
@@ -123,7 +123,7 @@ class ResNet(on.Module):
             layers.append(block(self.in_chans, chans, stride))
             self.in_chans = chans * block.expansion
         return nn.Sequential(*layers)
-    
+
     def forward(self, x):
         out = self.act(self.bn1(self.conv1(x)))
         out = self.pool(out)
@@ -145,14 +145,14 @@ def get_resnet_config(dataset):
 
     if dataset not in configs:
         raise ValueError(f"ResNet with dataset {dataset} is not supported.")
-    
+
     config = configs[dataset]
     conv1_params = {
         'kernel_size': config["kernel_size"],
         'stride': config["stride"],
         'padding': config["padding"]
     }
-    
+
     return conv1_params, config["num_classes"]
 
 def ResNet1(dataset='cifar10'):
@@ -186,11 +186,11 @@ def run_orion_resnet_demo():
     """Run the complete Orion ResNet demo following the MLP pattern."""
     print("🧠 Orion ResNet Demo - ResNet to HEIR Translation")
     print("=" * 60)
-    
+
     # Step 1: Initialize Orion scheme with embedded config
     print("\n1️⃣ Initializing Orion Scheme")
     print("-" * 30)
-    
+
     # Embedded ResNet config (from configs/resnet.yml)
     config = {
         'ckks_params': {
@@ -210,113 +210,113 @@ def run_orion_resnet_demo():
             'backend': 'lattigo',
             'fuse_modules': True,
             'debug': True,
-            'diags_path': '',
-            'keys_path': '',
-            'io_mode': 'none'
+            'diags_path': 'data/resnet_diagonals.h5',
+            'keys_path': 'data/resnet_keys.h5',
+            'io_mode': 'save'  # none to keep all cleartexts in memory
         }
     }
-    
+
     scheme = orion.init_scheme(config)
     print("✅ Orion scheme initialized with ResNet parameters")
-    
+
     # Step 2: Load CIFAR-10 dataset
     print("\n2️⃣ Loading CIFAR-10 Dataset")
     print("-" * 30)
-    
+
     trainloader, testloader = get_cifar_datasets(data_dir="../data", batch_size=1)
     print("✅ CIFAR-10 dataset loaded")
-    
+
     # Step 3: Create ResNet model
     print("\n3️⃣ Creating ResNet Model")
     print("-" * 30)
-    
+
     net = ResNet10()
     print("✅ Created ResNet8 for CIFAR-10 (minimal version):")
     print("   - Initial conv: Conv2d(3, 16, kernel_size=3)")
     print("   - Layer 1: 1 BasicBlock with 16 channels")
-    print("   - Layer 2: 1 BasicBlock with 32 channels") 
+    print("   - Layer 2: 1 BasicBlock with 32 channels")
     print("   - Layer 3: 1 BasicBlock with 64 channels")
     print("   - Final: AdaptiveAvgPool2d + Linear(64, 10)")
     print("   - Total: ~8 layers (much smaller than ResNet20)")
-    
+
     # Step 4: Get test batch
     print("\n4️⃣ Preparing Test Input")
     print("-" * 30)
-    
+
     inp, target = next(iter(testloader))
     print(f"✅ Input shape: {inp.shape}")
     print(f"📊 Input range: [{inp.min():.3f}, {inp.max():.3f}]")
     print(f"🎯 Target class: {target.item()}")
-    
+
     # Step 5: Run cleartext inference
     print("\n5️⃣ Cleartext Reference Inference")
     print("-" * 30)
-    
+
     net.eval()
     with torch.no_grad():
         out_clear = net(inp)
-    
+
     predicted_class = torch.argmax(out_clear, dim=1).item()
     confidence = torch.softmax(out_clear, dim=1).max().item()
-    
+
     print(f"✅ Cleartext output shape: {out_clear.shape}")
     print(f"🔮 Predicted class: {predicted_class} (confidence: {confidence:.3f})")
     print(f"📊 Output logits (first 5): {out_clear.flatten()[:5].tolist()}")
-    
+
     # Step 6: Compile for FHE (no execution needed)
     print("\n6️⃣ Compiling Model for FHE")
     print("-" * 30)
-    
+
     # Orion automatically analyzes the model and estimates ranges
     print("📊 Analyzing model with Orion...")
     orion.fit(net, inp)
-    
+
     # Compile the model for FHE
     print("🔧 Compiling model for FHE...")
     input_level = orion.compile(net)
     print(f"✅ Model compiled, input level: {input_level}")
-    
+
     # Step 7: Extract FHE operations via OrionFrontend
     print("\n7️⃣ Extracting FHE Operations")
     print("-" * 30)
-    
+
     try:
         # Create OrionFrontend to extract operations from compiled model
         frontend = OrionFrontend()
-        
+
         # Extract operations from the compiled Orion model
         print("🔍 Extracting operations from compiled model...")
         operations = frontend.extract_operations(net)
-        
+
         print(f"✅ Extracted {len(operations)} FHE operations")
-        
+
         # Print operation summary
         op_types = {}
         for op in operations:
             op_type = op.op_type
             op_types[op_type] = op_types.get(op_type, 0) + 1
-        
+
         print("📊 Operations by type:")
         for op_type, count in sorted(op_types.items()):
             print(f"   {op_type:20}: {count:2d} operations")
-            
+
     except Exception as e:
         print(f"❌ Error extracting operations: {e}")
         print("   Using fallback operation creation...")
-        
+
         # Fallback: create basic operations if extraction fails
         operations = frontend.create_mlp_operations() if hasattr(frontend, 'create_mlp_operations') else []
         print(f"✅ Created {len(operations)} fallback operations")
-    
+
     # Step 8: Create FHE scheme parameters
     print("\n8️⃣ Setting Up FHE Scheme Parameters")
     print("-" * 30)
-    
+
     try:
         scheme_params = OrionSchemeParameters(
             logN=16,  # From resnet config: LogN: 16
             logQ=[55, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40],  # From resnet config
-            logP=[61, 61, 61],  # From resnet config  
+            logP=[61, 61, 61],  # From resnet config
             logScale=40,  # From resnet config
             slots=32768,  # 2^15 for LogN=16
             ring_degree=65536,  # 2^16
@@ -337,39 +337,39 @@ def run_orion_resnet_demo():
             backend='lattigo',
             require_orion=False
         )
-    
+
     # Step 9: Generate HEIR MLIR
     print("\n9️⃣ Generating HEIR MLIR")
     print("-" * 30)
-    
+
     try:
         # Create HEIR translator
         translator = GenericTranslator()
-        
+
         # Translate to HEIR MLIR
         print("🔧 Translating operations to HEIR MLIR...")
         module = translator.translate(
-            operations, 
+            operations,
             scheme_params,
             function_name="resnet10"
         )
         # Generate MLIR output
         from xdsl.printer import Printer
         from io import StringIO
-        
+
         output_buffer = StringIO()
         printer = Printer(stream=output_buffer)
         printer.print(module)
         mlir_output = output_buffer.getvalue()
-        
+
         # Save MLIR output
         output_path = Path("resnet10_fhe.mlir")
         output_path.write_text(mlir_output)
-        
+
         print(f"✅ HEIR MLIR generated and saved to {output_path}")
         print(f"📄 Output file size: {len(mlir_output)} characters")
         print(f"📄 Lines of MLIR: {len(mlir_output.splitlines())}")
-        
+
         # Show a preview
         lines = mlir_output.split('\n')
         print("\n📖 MLIR Preview (first 10 lines):")
@@ -377,33 +377,33 @@ def run_orion_resnet_demo():
             print(f"   {i+1:2d}: {line}")
         if len(lines) > 10:
             print(f"   ... ({len(lines)-10} more lines)")
-        
+
         # Show summary statistics
         print("\n📊 MLIR Summary:")
         func_lines = [l for l in lines if 'func.func' in l]
         op_lines = [l for l in lines if any(op in l for op in ['bgv.', 'ckks.', 'heir.'])]
         print(f"   Functions: {len(func_lines)}")
         print(f"   FHE operations: {len(op_lines)}")
-            
+
     except Exception as e:
         print(f"❌ Error generating HEIR MLIR: {e}")
         import traceback
         traceback.print_exc()
         return False
-    
+
     print("\n🎉 ResNet8 compilation and translation completed successfully!")
     print("\nNext steps:")
     print("   1. Use HEIR tools to optimize the MLIR")
     print("   2. Compile to OpenFHE with heir-translate")
     print("   3. Execute FHE inference with OpenFHE")
-    
+
     return True
 
 
 if __name__ == "__main__":
     # Set random seed for reproducibility
     torch.manual_seed(42)
-    
+
     try:
         success = run_orion_resnet_demo()
         exit_code = 0 if success else 1
@@ -412,7 +412,7 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
         exit_code = 1
-    
+
     print(f"\n{'🎉 Success!' if exit_code == 0 else '💥 Failed!'}")
     sys.exit(exit_code)
 

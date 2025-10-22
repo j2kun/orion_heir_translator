@@ -328,9 +328,9 @@ def create_config(output: Path):
             "backend": "lattigo",
             "fuse_modules": True,
             "debug": False,
-            "diags_path": "",
-            "keys_path": "",
-            "io_mode": "none",
+            "diags_path": "data/diagonals.h5",
+            "keys_path": "data/keys.h5",
+            "io_mode": "save",
         },
     }
 

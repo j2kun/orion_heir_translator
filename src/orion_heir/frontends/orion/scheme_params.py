@@ -115,7 +115,7 @@ class OrionSchemeParameters(SchemeParameters):
                     "debug": False,
                     "diags_path": "data/diagonals.h5",
                     "keys_path": "data/keys.h5",
-                    "io_mode": "none",
+                    "io_mode": "save",
                 },
             }
 

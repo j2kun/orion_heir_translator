@@ -154,7 +154,7 @@ class OrionFrontend(FrontendInterface):
                 "noise_growth": "minimal",
             },
             # Polynomial operations
-            "ckks.chebyshev": {
+            "orion.chebyshev": {
                 "description": "Evaluate Chebyshev polynomial with coefficients",
                 "operands": 1,
                 "level_change": -1,
@@ -1175,7 +1175,7 @@ class OrionFrontend(FrontendInterface):
             # Sign polynomial evaluation using Orion's coefficients
             operations.append(
                 FHEOperation(
-                    op_type="ckks.chebyshev",
+                    op_type="orion.chebyshev",
                     method_name="chebyshev",
                     args=[],
                     kwargs={
@@ -1250,7 +1250,7 @@ class OrionFrontend(FrontendInterface):
 
             operations.append(
                 FHEOperation(
-                    op_type="ckks.chebyshev",
+                    op_type="orion.chebyshev",
                     method_name="chebyshev",
                     args=[],
                     kwargs={
@@ -1404,7 +1404,7 @@ class OrionFrontend(FrontendInterface):
         if coeffs:
             operations.append(
                 FHEOperation(
-                    op_type="ckks.chebyshev",
+                    op_type="orion.chebyshev",
                     method_name="chebyshev",
                     args=[],
                     kwargs={
@@ -1423,7 +1423,7 @@ class OrionFrontend(FrontendInterface):
                     },
                 )
             )
-            print(f"       ✅ Created ckks.chebyshev operation with {len(coeffs)} coefficients")
+            print(f"       ✅ Created orion.chebyshev operation with {len(coeffs)} coefficients")
         else:
             print("       ⚠️ No coefficients available, skipping operation creation")
 
@@ -1458,7 +1458,7 @@ class OrionFrontend(FrontendInterface):
 
         operations.append(
             FHEOperation(
-                op_type="ckks.chebyshev",
+                op_type="orion.chebyshev",
                 method_name="chebyshev",
                 args=[],
                 kwargs={
