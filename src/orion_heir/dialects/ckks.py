@@ -328,7 +328,9 @@ class RelinearizeOp(IRDLOperation):
     )
     irdl_options = [ParsePropInAttrDict()]
 
-    assembly_format = "$input attr-dict `:` type($input) `->` type($result)"
+    # extra parens around input is because ckks dialect has an optional ksk arg and
+    # uses functional-type(operands, results)
+    assembly_format = "$input attr-dict `:` `(` type($input) `)` `->` type($result)"
 
 
 @irdl_op_definition
