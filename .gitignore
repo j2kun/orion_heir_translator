@@ -4,3 +4,4 @@ venv
 wheelhouse
 .python-version
 __pycache__
+data/
