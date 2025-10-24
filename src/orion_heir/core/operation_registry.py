@@ -896,6 +896,7 @@ class CKKSQuadHandler(BaseOperationHandler):
 
         print("✅ Created ckks.mul + ckks.relinearize operations (x * x)")
         return relin_op.results[0]
+        # FIXME: do I need this rescale?
         # rescaled_type = type_builder.create_rescaled_type(relin_op.results[0].type, original_scale)
         #
         # rescale_op = RescaleOp(
@@ -921,7 +922,6 @@ class ChebyshevHandler(BaseOperationHandler):
     ) -> SSAValue:
         """Handle Chebyshev polynomial evaluation."""
         from ..dialects.orion import ChebyshevOp
-        from ..dialects.ckks import BootstrapOp
         from xdsl.dialects.builtin import ArrayAttr, FloatAttr, f64
 
         # Get coefficients from operation
@@ -939,19 +939,16 @@ class ChebyshevHandler(BaseOperationHandler):
         coeff_attrs = [FloatAttr(float(c), f64) for c in coeffs]
         coeff_array = ArrayAttr(coeff_attrs)
 
-        # Create result type
-        bootstrap_result_type = type_builder.get_default_ciphertext_type()
+        # Manual bootstrapping to deal with OpenFHE issues; removed and see if
+        # we can deal with them from inside HEIR.
+        # bootstrap_result_type = type_builder.get_default_ciphertext_type()
+        # bootstrap_op = BootstrapOp(operands=[current_value], result_types=[bootstrap_result_type])
+        # block.add_op(bootstrap_op)
+        # bootstrapped_value = bootstrap_op.results[0]
 
-        # FIXME: use Orion's bootstrap placement
-        # Create bootstrap operation
-        bootstrap_op = BootstrapOp(operands=[current_value], result_types=[bootstrap_result_type])
-
-        block.add_op(bootstrap_op)
-        bootstrapped_value = bootstrap_op.results[0]
         result_type = type_builder.get_default_ciphertext_type()
-        # Create Chebyshev operation
         cheby_op = ChebyshevOp(
-            operands=[bootstrapped_value],
+            operands=[current_value],
             result_types=[result_type],
             properties={
                 "coefficients": coeff_array,
@@ -963,7 +960,6 @@ class ChebyshevHandler(BaseOperationHandler):
         block.add_op(cheby_op)
         print("✅ Created orion.chebyshev operation")
 
-        # Store result
         if operation.result_var:
             constants[operation.result_var] = cheby_op.results[0]
 
