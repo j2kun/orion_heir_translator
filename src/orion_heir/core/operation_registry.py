@@ -954,14 +954,9 @@ class CKKSBootstrapHandler(BaseOperationHandler):
         """Handle bootstrap (refresh) operation."""
         from ..dialects.ckks import BootstrapOp
 
-        # Create result type (bootstrap typically resets to fresh ciphertext)
         result_type = type_builder.get_default_ciphertext_type()
-
-        # Create bootstrap operation
         bootstrap_op = BootstrapOp(operands=[current_value], result_types=[result_type])
-
         block.add_op(bootstrap_op)
-        # Store result
         if operation.result_var:
             constants[operation.result_var] = bootstrap_op.results[0]
 
