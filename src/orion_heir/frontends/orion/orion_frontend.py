@@ -10,16 +10,16 @@ import yaml
 import torch
 from pathlib import Path
 
-from ...core.types import FHEOperation, FrontendInterface, SchemeParameters
-from .scheme_params import OrionSchemeParameters
+from src.orion_heir.core.types import FHEOperation, FrontendInterface, SchemeParameters
+from src.orion_heir.frontends.orion.scheme_params import OrionSchemeParameters
 
 
 def fix_encode_operations(module, type_builder):
     """
     Simplest approach: collect info, then rebuild operations that need fixing.
     """
-    from ...dialects.lwe import RLWEEncodeOp, InverseCanonicalEncodingAttr
-    from ...dialects.ckks import AddPlainOp, SubPlainOp, MulPlainOp
+    from src.orion_heir.dialects.lwe import RLWEEncodeOp, InverseCanonicalEncodingAttr
+    from src.orion_heir.dialects.ckks import AddPlainOp, SubPlainOp, MulPlainOp
     from xdsl.dialects.builtin import IntegerAttr, IntegerType
 
     print("🔧 Starting simple encode fix pass...")

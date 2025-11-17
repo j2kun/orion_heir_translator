@@ -27,12 +27,10 @@ from xdsl.printer import Printer
 from xdsl.traits import Pure, Commutative
 
 # Import our custom dialects - this ensures they are loaded when CKKS is loaded
-from .lwe import LWE, LWECiphertextType, LWEPlaintextType
-from .polynomial import RingAttr
-from .mod_arith import ModArith
-from .rns import RNS
+from src.orion_heir.dialects.lwe import LWECiphertextType, LWEPlaintextType
+from src.orion_heir.dialects.polynomial import RingAttr
 
-from .lwe_traits import (
+from src.orion_heir.dialects.lwe_traits import (
     SameOperandsAndResultRings,
     SameOperandsAndResultPlaintextTypes,
     AllCiphertextTypesMatch,

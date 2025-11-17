@@ -8,7 +8,7 @@ including integration with the actual Orion library when available.
 from typing import List, Optional, Union
 import warnings
 
-from ...core.types import SchemeParameters
+from src.orion_heir.core.types import SchemeParameters
 
 
 class OrionNotAvailableError(Exception):

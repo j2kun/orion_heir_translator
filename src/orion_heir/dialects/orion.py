@@ -20,7 +20,7 @@ from xdsl.irdl import (
 from xdsl.traits import Pure
 
 # Ensure LWE is loaded
-from .lwe import LWECiphertextType, LWEPlaintextType
+from src.orion_heir.dialects.lwe import LWECiphertextType
 
 
 @irdl_op_definition

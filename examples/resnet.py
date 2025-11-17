@@ -10,8 +10,6 @@ This demonstrates a complete ResNet workflow:
 5. Translate to HEIR MLIR for OpenFHE compilation
 """
 
-import time
-import math
 import torch
 import torch.nn as nn
 import sys
@@ -23,11 +21,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 # Import Orion
 import orion
 import orion.nn as on
-from orion.core.utils import get_cifar_datasets, mae
+from orion.core.utils import get_cifar_datasets
 
 # Import our HEIR translator
-from orion_heir import GenericTranslator, OrionFrontend
-from orion_heir.frontends.orion.scheme_params import OrionSchemeParameters
+from src.orion_heir import GenericTranslator, OrionFrontend
+from src.orion_heir.frontends.orion.scheme_params import OrionSchemeParameters
 
 
 # ================================

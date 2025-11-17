@@ -13,10 +13,8 @@ from xdsl.ir import SSAValue, Block
 from xdsl.dialects.builtin import (
     ArrayAttr,
     DenseArrayBase,
-    DenseIntOrFPElementsAttr,
     DictionaryAttr,
     FloatAttr,
-    FunctionType,
     IntegerAttr,
     IntegerType,
     StringAttr,
@@ -25,11 +23,10 @@ from xdsl.dialects.builtin import (
     i32,
 )
 from xdsl.dialects.func import FuncOp
-from xdsl.dialects.arith import ConstantOp
-from ..dialects.orion import LinearTransformOp
-from ..dialects.lwe import RLWEEncodeOp, LWEPlaintextType
-from .translator import FHEOperation
-from ..dialects.ckks import (
+from src.orion_heir.dialects.orion import LinearTransformOp
+from src.orion_heir.dialects.lwe import RLWEEncodeOp, LWEPlaintextType
+from src.orion_heir.core.translator import FHEOperation
+from src.orion_heir.dialects.ckks import (
     AddOp,
     AddPlainOp,
     MulOp,
@@ -693,7 +690,7 @@ class LinearTransformHandler(BaseOperationHandler):
         self, left: SSAValue, right: SSAValue, block: Block, type_builder: Any
     ) -> SSAValue:
         """Add two ciphertexts."""
-        from ..dialects.ckks import AddOp
+        from src.orion_heir.dialects.ckks import AddOp
 
         add_op = AddOp(operands=[left, right], result_types=[left.type])
         block.add_op(add_op)
@@ -749,7 +746,7 @@ class LinearTransformHandler(BaseOperationHandler):
         orion_metadata: Dict,
     ) -> SSAValue:
         """Fallback handler for single block or no diagonal data."""
-        from ..dialects.ckks import LinearTransformOp
+        from src.orion_heir.dialects.ckks import LinearTransformOp
 
         # Create simple linear transform operation
         attributes = self._create_attributes_from_metadata(orion_metadata, operation)
@@ -899,7 +896,7 @@ class ChebyshevHandler(BaseOperationHandler):
         type_builder: Any,
     ) -> SSAValue:
         """Handle Chebyshev polynomial evaluation."""
-        from ..dialects.orion import ChebyshevOp
+        from src.orion_heir.dialects.orion import ChebyshevOp
         from xdsl.dialects.builtin import ArrayAttr, FloatAttr, f64
 
         # Get coefficients from operation
@@ -952,7 +949,7 @@ class CKKSBootstrapHandler(BaseOperationHandler):
         type_builder: Any,
     ) -> SSAValue:
         """Handle bootstrap (refresh) operation."""
-        from ..dialects.ckks import BootstrapOp
+        from src.orion_heir.dialects.ckks import BootstrapOp
 
         result_type = type_builder.get_default_ciphertext_type()
         bootstrap_op = BootstrapOp(operands=[current_value], result_types=[result_type])

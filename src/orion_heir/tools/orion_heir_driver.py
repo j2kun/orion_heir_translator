@@ -14,10 +14,10 @@ from typing import Optional, List, Any
 
 from xdsl.printer import Printer
 
-from ..core.translator import GenericTranslator
-from ..frontends.orion.orion_frontend import OrionFrontend
-from ..frontends.orion.operation_extractor import OrionOperationExtractor
-from .common_utils import setup_logging, validate_file_path, create_output_directory
+from src.orion_heir.core.translator import GenericTranslator
+from src.orion_heir.frontends.orion.orion_frontend import OrionFrontend
+from src.orion_heir.frontends.orion.operation_extractor import OrionOperationExtractor
+from src.orion_heir.tools.common_utils import setup_logging, create_output_directory
 
 
 class OrionHeirDriver:
@@ -273,20 +273,20 @@ def _validate_mlir(mlir_content: str) -> bool:
 
         context = Context()
         # Load necessary dialects
-        from ..dialects.ckks import CKKS
-        from ..dialects.lwe import LWE
-        from ..dialects.polynomial import Polynomial
-        from ..dialects.mod_arith import ModArith
-        from ..dialects.orion import Orion
-        from ..dialects.rns import RNS
-        from ..dialects.mgmt import MGMT
+        from src.orion_heir.dialects.ckks import CKKS
+        from src.orion_heir.dialects.lwe import LWE
+        from src.orion_heir.dialects.polynomial import Polynomial
+        from src.orion_heir.dialects.mod_arith import ModArith
+        from src.orion_heir.dialects.orion import Orion
+        from src.orion_heir.dialects.rns import RNS
+        from src.orion_heir.dialects.mgmt import MGMT
 
         dialects = [CKKS, LWE, Polynomial, ModArith, RNS, MGMT, Orion]
         for dialect in dialects:
             context.load_dialect(dialect)
 
         parser = Parser(context, StringIO(mlir_content))
-        module = parser.parse_module()
+        parser.parse_module()
 
         print("✅ MLIR validation passed")
         return True

@@ -168,7 +168,7 @@ def main():
     print(f"\n🎯 Extracting Orion Operations:")
     print(f"=" * 40)
 
-    from orion_heir.frontends.orion.orion_frontend import OrionFrontend
+    from src.orion_heir.frontends.orion.orion_frontend import OrionFrontend
     frontend = OrionFrontend()
 
     operations = frontend.extract_operations(model)
@@ -203,9 +203,9 @@ def main():
 
     # Now translate to MLIR
     print(f"\n🔄 Translating to HEIR MLIR...")
-    from orion_heir import GenericTranslator
+    from src.orion_heir import GenericTranslator
 
-    from orion_heir.frontends.orion.scheme_params import OrionSchemeParameters
+    from src.orion_heir.frontends.orion.scheme_params import OrionSchemeParameters
 
     scheme_params = OrionSchemeParameters(
         logN=13,
