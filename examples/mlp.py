@@ -62,15 +62,15 @@ def main():
 
     # Create the model
     model = MLP()
-    print(f"✅ Model: MLP with layers (matching Orion examples):")
-    print(f"   - flatten: Flatten()")
-    print(f"   - fc1: Linear(784, 128)")
-    print(f"   - bn1: BatchNorm1d(128)")
-    print(f"   - act1: Quad()")
-    print(f"   - fc2: Linear(128, 128)")
-    print(f"   - bn2: BatchNorm1d(128)")
-    print(f"   - act2: Quad()")
-    print(f"   - fc3: Linear(128, 10)")
+    print("✅ Model: MLP with layers (matching Orion examples):")
+    print("   - flatten: Flatten()")
+    print("   - fc1: Linear(784, 128)")
+    print("   - bn1: BatchNorm1d(128)")
+    print("   - act1: Quad()")
+    print("   - fc2: Linear(128, 128)")
+    print("   - bn2: BatchNorm1d(128)")
+    print("   - act2: Quad()")
+    print("   - fc3: Linear(128, 10)")
 
     # Create input (MNIST format that Orion expects - 4D tensor)
     x = torch.randn(1, 1, 28, 28)  # Batch, Channel, Height, Width
@@ -83,14 +83,14 @@ def main():
     print(f"✅ Cleartext output shape: {output.shape}")
 
     # Fit and compile the model
-    print(f"\n🔧 Orion fit and compile...")
+    print("\n🔧 Orion fit and compile...")
     orion.fit(model, x)
     input_level = orion.compile(model)
     print(f"✅ Compiled successfully, input level: {input_level}")
 
     # Print what Orion created during compile
-    print(f"\n📋 Orion Compilation Results:")
-    print(f"=" * 40)
+    print("\n📋 Orion Compilation Results:")
+    print("=" * 40)
 
     for name, layer in model.named_modules():
         if hasattr(layer, 'diagonals') or hasattr(layer, 'transform_ids') or hasattr(layer, 'level'):
@@ -137,17 +137,17 @@ def main():
                 print(f"  Flatten dims: {layer.start_dim} to {layer.end_dim}")
 
     # Switch to HE mode and see what operations Orion would do
-    print(f"\n🔄 Switching to HE mode...")
+    print("\n🔄 Switching to HE mode...")
     model.he()
 
     # Create encrypted input
     vec_ptxt = orion.encode(x, input_level)
     vec_ctxt = orion.encrypt(vec_ptxt)
-    print(f"✅ Created encrypted input")
+    print("✅ Created encrypted input")
 
     # Show the inference operations
-    print(f"\n🎯 Orion HE Inference Operations:")
-    print(f"=" * 40)
+    print("\n🎯 Orion HE Inference Operations:")
+    print("=" * 40)
 
     print(f"Input ciphertext level: {vec_ctxt.level()}")
     print(f"Input ciphertext slots: {vec_ctxt.slots()}")
@@ -165,8 +165,8 @@ def main():
     print(f"Total rotations across all layers: {total_rotations}")
 
     # Extract operations from the compiled model
-    print(f"\n🎯 Extracting Orion Operations:")
-    print(f"=" * 40)
+    print("\n🎯 Extracting Orion Operations:")
+    print("=" * 40)
 
     from src.orion_heir.frontends.orion.orion_frontend import OrionFrontend
     frontend = OrionFrontend()
@@ -183,8 +183,8 @@ def main():
                 print(f"      {'':15}    ↳ {desc} ({layer})")
 
     # Show operations by layer
-    print(f"\n📊 Operations by Layer:")
-    print(f"=" * 40)
+    print("\n📊 Operations by Layer:")
+    print("=" * 40)
 
     layer_ops = {}
     for op in operations:
