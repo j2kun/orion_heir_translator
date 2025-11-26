@@ -58,6 +58,10 @@ class TypeBuilder:
         self.mod_types = [
             ModArithType([IntegerAttr(modulus, IntegerType(64))]) for modulus in moduli
         ]
+        aux_moduli = self.scheme_params.auxiliary_modulus_chain
+        self.aux_mod_types = [
+            ModArithType([IntegerAttr(modulus, IntegerType(64))]) for modulus in aux_moduli
+        ]
 
         # Build RNS type
         self.rns_type = RNSType([ArrayAttr(self.mod_types)])
@@ -105,13 +109,7 @@ class TypeBuilder:
             [
                 IntegerAttr(getattr(self.scheme_params, "log_n", 13), IntegerType(32)),
                 ArrayAttr([IntegerAttr(mod, IntegerType(64)) for mod in moduli]),
-                ArrayAttr(
-                    [
-                        IntegerAttr(
-                            getattr(self.scheme_params, "plaintext_modulus", 65537), IntegerType(64)
-                        )
-                    ]
-                ),
+                ArrayAttr([IntegerAttr(mod, IntegerType(64)) for mod in aux_moduli]),
                 IntegerAttr(getattr(self.scheme_params, "log_scale", 40), IntegerType(32)),
             ]
         )
@@ -482,6 +480,7 @@ class TypeBuilder:
 
     def infer_result_type(self, op_type: str, lhs_type: Any, rhs_type: Any) -> Any:
         """Infer the result type for a binary operation."""
+
         def get_scaling_factor_from_encoding(encoding_attr):
             """Extract scaling factor from encoding attribute."""
             if isinstance(encoding_attr, InverseCanonicalEncodingAttr):
@@ -718,4 +717,4 @@ class TypeBuilder:
 
     def create_module_attributes(self) -> Dict[str, Any]:
         """Create module-level attributes."""
-        return {"ckks.schemeParam": self.scheme_param}
+        return {"scheme.ckks": None, "ckks.schemeParam": self.scheme_param}
