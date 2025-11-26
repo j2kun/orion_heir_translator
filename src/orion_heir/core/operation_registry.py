@@ -338,7 +338,7 @@ class CKKSRotationHandler(BaseOperationHandler):
         rotate_op = RotateOp(
             operands=[current_value],
             result_types=[result_type],
-            properties={"offset": IntegerAttr(offset, IntegerType(32))},
+            properties={"offset": IntegerAttr(offset, i32)},
         )
 
         block.add_op(rotate_op)
@@ -718,21 +718,22 @@ class LinearTransformHandler(BaseOperationHandler):
         attributes = {}
 
         # Block coordinates
-        attributes["block_row"] = IntegerAttr(row, IntegerType(32))
-        attributes["block_col"] = IntegerAttr(col, IntegerType(32))
+        attributes["block_row"] = IntegerAttr(row, i32)
+        attributes["block_col"] = IntegerAttr(col, i32)
 
         # Diagonal information
-        attributes["diagonal_count"] = IntegerAttr(len(diagonal_indices), IntegerType(32))
+        attributes["diagonal_count"] = IntegerAttr(len(diagonal_indices), i32)
+        attributes["diagonal_indices"] = DenseArrayBase.create_dense_int(i32, diagonal_indices)
 
         # Orion metadata
         if "slots" in orion_metadata:
-            attributes["slots"] = IntegerAttr(orion_metadata["slots"], IntegerType(32))
+            attributes["slots"] = IntegerAttr(orion_metadata["slots"], i32)
 
         if "bsgs_ratio" in orion_metadata:
             attributes["bsgs_ratio"] = FloatAttr(orion_metadata["bsgs_ratio"], f64)
 
         if "orion_level" in orion_metadata:
-            attributes["orion_level"] = IntegerAttr(orion_metadata["orion_level"], IntegerType(32))
+            attributes["orion_level"] = IntegerAttr(orion_metadata["orion_level"], i32)
 
         return attributes
 
@@ -798,9 +799,7 @@ class LinearTransformHandler(BaseOperationHandler):
 
         # Core parameters
         if "diagonal_count" in orion_metadata:
-            attributes["diagonal_count"] = IntegerAttr(
-                orion_metadata["diagonal_count"], IntegerType(32)
-            )
+            attributes["diagonal_count"] = IntegerAttr(orion_metadata["diagonal_count"], i32)
 
         if "layer" in orion_metadata:
             attributes["layer_name"] = StringAttr(orion_metadata["layer"])
@@ -809,26 +808,22 @@ class LinearTransformHandler(BaseOperationHandler):
             attributes["bsgs_ratio"] = FloatAttr(orion_metadata["bsgs_ratio"], f64)
 
         if "baby_step_size" in orion_metadata:
-            attributes["baby_step_size"] = IntegerAttr(
-                orion_metadata["baby_step_size"], IntegerType(32)
-            )
+            attributes["baby_step_size"] = IntegerAttr(orion_metadata["baby_step_size"], i32)
 
         if "giant_step_size" in orion_metadata:
-            attributes["giant_step_size"] = IntegerAttr(
-                orion_metadata["giant_step_size"], IntegerType(32)
-            )
+            attributes["giant_step_size"] = IntegerAttr(orion_metadata["giant_step_size"], i32)
 
         if "slots" in orion_metadata:
-            attributes["slots"] = IntegerAttr(orion_metadata["slots"], IntegerType(32))
+            attributes["slots"] = IntegerAttr(orion_metadata["slots"], i32)
 
         if "matrix_shape" in orion_metadata:
             shape = orion_metadata["matrix_shape"]
             if isinstance(shape, (list, tuple)) and len(shape) == 2:
-                attributes["matrix_rows"] = IntegerAttr(shape[0], IntegerType(32))
-                attributes["matrix_cols"] = IntegerAttr(shape[1], IntegerType(32))
+                attributes["matrix_rows"] = IntegerAttr(shape[0], i32)
+                attributes["matrix_cols"] = IntegerAttr(shape[1], i32)
 
         if "orion_level" in orion_metadata:
-            attributes["orion_level"] = IntegerAttr(orion_metadata["orion_level"], IntegerType(32))
+            attributes["orion_level"] = IntegerAttr(orion_metadata["orion_level"], i32)
 
         return attributes
 
@@ -877,7 +872,7 @@ class CKKSQuadHandler(BaseOperationHandler):
         rescale_op = RescaleOp(
             operands=[relin_op.results[0]],
             result_types=[rescaled_type],
-            properties={"to_ring": type_builder.get_next_modulus_ring(relin_op.results[0].type)}
+            properties={"to_ring": type_builder.get_next_modulus_ring(relin_op.results[0].type)},
         )
         block.add_op(rescale_op)
 
