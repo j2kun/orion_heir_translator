@@ -8,14 +8,15 @@ FHE scheme parameters, handling the complex type system in a clean way.
 from typing import Dict, Any
 
 from xdsl.dialects.builtin import (
-    IntegerAttr,
     ArrayAttr,
+    Block,
+    IntegerAttr,
+    IntegerType,
+    SSAValue,
     StringAttr,
     TensorType,
-    IntegerType,
+    UnitAttr,
     f64,
-    Block,
-    SSAValue,
 )
 from src.orion_heir.dialects.lwe import (
     InverseCanonicalEncodingAttr,
@@ -717,4 +718,4 @@ class TypeBuilder:
 
     def create_module_attributes(self) -> Dict[str, Any]:
         """Create module-level attributes."""
-        return {"scheme.ckks": None, "ckks.schemeParam": self.scheme_param}
+        return {"scheme.ckks": UnitAttr(), "ckks.schemeParam": self.scheme_param}
