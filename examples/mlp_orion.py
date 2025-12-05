@@ -1,130 +1,142 @@
+#!/usr/bin/env python3
+"""
+Minimal test to see what Orion does with a multi-layer MLP - no translation, just print Orion's IR.
+"""
+
+import sys
 from pathlib import Path
-import orion
-import orion.nn as nn
 import torch
 
+# Add the src directory to the path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-class MLP(nn.Module):
-    def __init__(self):
-        super(MLP, self).__init__()
-        # Flatten input is handled in forward, layers defined here
-        self.fc1 = nn.Linear(784, 512)  # Input to Hidden 1
-        self.fc2 = nn.Linear(512, 512)  # Hidden 1 to Hidden 2
-        self.fc3 = nn.Linear(512, 10)  # Hidden 2 to Output
-        self.dropout = nn.Dropout(0.2)  # Standard regularization
-        self.relu = nn.ReLU()  # Standard activation
+# Import Orion (assuming it's available)
+import orion
+import orion.nn as on
+
+
+class MLP(on.Module):
+
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.flatten = on.Flatten()
+
+        self.fc1 = on.Linear(784, 128)
+        self.bn1 = on.BatchNorm1d(128)
+        self.act1 = on.Quad()
+
+        self.fc2 = on.Linear(128, 128)
+        self.bn2 = on.BatchNorm1d(128)
+        self.act2 = on.Quad()
+
+        self.fc3 = on.Linear(128, num_classes)
 
     def forward(self, x):
-        # Flatten image: (Batch_Size, 1, 28, 28) -> (Batch_Size, 784)
-        x = x.view(-1, 28 * 28)
-
-        # Layer 1
-        x = self.relu(self.fc1(x))
-        x = self.dropout(x)
-
-        # Layer 2
-        x = self.relu(self.fc2(x))
-        x = self.dropout(x)
-
-        # Output Layer (Raw logits, CrossEntropyLoss handles Softmax)
-        x = self.fc3(x)
-        return x
+        x = self.flatten(x)
+        x = self.act1(self.bn1(self.fc1(x)))
+        x = self.act2(self.bn2(self.fc2(x)))
+        return self.fc3(x)
 
 
 def main():
+    print("🚀 MLP Orion Test - Show Orion's Actual IR")
+    print("=" * 50)
+
     # Initialize Orion scheme with actual MLP config values
-    orion.init_scheme(
-        {
-            "ckks_params": {
-                "LogN": 13,
-                "LogQ": [29, 26, 26, 26, 26, 26],
-                "LogP": [29, 29],
-                "LogScale": 26,
-                "H": 8192,
-            },
-            "orion": {
-                "backend": "lattigo",
-                "diags_path": "data/mlp_diagonals.h5",
-                "keys_path": "data/mlp_keys.h5",
-                "io_mode": "save",  # none to keep all cleartexts in memory
-            },
+    orion.init_scheme({
+        'ckks_params': {
+            'LogN': 13,
+            'LogQ': [29, 26, 26, 26, 26, 26],
+            'LogP': [29, 29],
+            'LogScale': 26,
+            'H': 8192
+        },
+        'orion': {
+            'backend': 'lattigo',
+            'diags_path': 'data/mlp_diagonals.h5',
+            'keys_path': 'data/mlp_keys.h5',
+            'io_mode': 'save'  # none to keep all cleartexts in memory
         }
-    )
+    })
+    print("✅ Orion scheme initialized")
+
+    # Create the model
     model = MLP()
+    print("✅ Model: MLP with layers (matching Orion examples):")
+    print("   - flatten: Flatten()")
+    print("   - fc1: Linear(784, 128)")
+    print("   - bn1: BatchNorm1d(128)")
+    print("   - act1: Quad()")
+    print("   - fc2: Linear(128, 128)")
+    print("   - bn2: BatchNorm1d(128)")
+    print("   - act2: Quad()")
+    print("   - fc3: Linear(128, 10)")
 
     # Create input (MNIST format that Orion expects - 4D tensor)
     x = torch.randn(1, 1, 28, 28)  # Batch, Channel, Height, Width
-    print(f"Input shape: {x.shape} (MNIST format: batch, channel, height, width)")
+    print(f"✅ Input shape: {x.shape} (MNIST format: batch, channel, height, width)")
+
+    # Test cleartext forward
     model.eval()
+    with torch.no_grad():
+        output = model(x)
+    print(f"✅ Cleartext output shape: {output.shape}")
 
     # Fit and compile the model
     print("\n🔧 Orion fit and compile...")
     orion.fit(model, x)
     input_level = orion.compile(model)
-    print(f"Compiled successfully, input level: {input_level}")
+    print(f"✅ Compiled successfully, input level: {input_level}")
 
     # Print what Orion created during compile
-    print("\nrion Compilation Results:")
+    print("\n📋 Orion Compilation Results:")
     print("=" * 40)
 
     for name, layer in model.named_modules():
-        if (
-            hasattr(layer, "diagonals")
-            or hasattr(layer, "transform_ids")
-            or hasattr(layer, "level")
-        ):
+        if hasattr(layer, 'diagonals') or hasattr(layer, 'transform_ids') or hasattr(layer, 'level'):
             print(f"\nLayer: {name}")
             print(f"  Type: {layer.__class__.__name__}")
             print(f"  Level: {getattr(layer, 'level', 'N/A')}")
 
-            if hasattr(layer, "weight"):
+            if hasattr(layer, 'weight'):
                 print(f"  Weight shape: {layer.weight.shape}")
-            if hasattr(layer, "bias") and layer.bias is not None:
+            if hasattr(layer, 'bias') and layer.bias is not None:
                 print(f"  Bias shape: {layer.bias.shape}")
 
-            if hasattr(layer, "diagonals"):
-                print(
-                    f"  Diagonals: {len(layer.diagonals) if layer.diagonals else 0} blocks"
-                )
+            if hasattr(layer, 'diagonals'):
+                print(f"  Diagonals: {len(layer.diagonals) if layer.diagonals else 0} blocks")
                 if layer.diagonals:
-                    print(
-                        f"    Keys: {list(layer.diagonals.keys())[:3]}{'...' if len(layer.diagonals) > 3 else ''}"
-                    )
+                    print(f"    Keys: {list(layer.diagonals.keys())[:3]}{'...' if len(layer.diagonals) > 3 else ''}")
 
-            if hasattr(layer, "transform_ids"):
-                print(
-                    f"  Transform IDs: {len(layer.transform_ids) if layer.transform_ids else 0}"
-                )
+            if hasattr(layer, 'transform_ids'):
+                print(f"  Transform IDs: {len(layer.transform_ids) if layer.transform_ids else 0}")
                 if layer.transform_ids:
-                    print(
-                        f"    Keys: {list(layer.transform_ids.keys())[:3]}{'...' if len(layer.transform_ids) > 3 else ''}"
-                    )
+                    print(f"    Keys: {list(layer.transform_ids.keys())[:3]}{'...' if len(layer.transform_ids) > 3 else ''}")
 
-            if hasattr(layer, "output_rotations"):
+            if hasattr(layer, 'output_rotations'):
                 print(f"  Output rotations: {layer.output_rotations}")
 
-            if hasattr(layer, "on_bias_ptxt"):
-                print(
-                    f"  Bias plaintext: {'Created' if layer.on_bias_ptxt is not None else 'None'}"
-                )
+            if hasattr(layer, 'on_bias_ptxt'):
+                print(f"  Bias plaintext: {'Created' if layer.on_bias_ptxt is not None else 'None'}")
 
             # For activation layers, show polynomial info
-            if hasattr(layer, "polynomial_coeffs"):
+            if hasattr(layer, 'polynomial_coeffs'):
                 print(f"  Polynomial coeffs: {layer.polynomial_coeffs}")
 
             # For batch norm layers, show parameters
-            if hasattr(layer, "running_mean") and hasattr(layer, "running_var"):
+            if hasattr(layer, 'running_mean') and hasattr(layer, 'running_var'):
                 print(f"  BatchNorm mean shape: {layer.running_mean.shape}")
                 print(f"  BatchNorm var shape: {layer.running_var.shape}")
-                if hasattr(layer, "weight") and layer.weight is not None:
+                if hasattr(layer, 'weight') and layer.weight is not None:
                     print(f"  BatchNorm weight shape: {layer.weight.shape}")
-                if hasattr(layer, "bias") and layer.bias is not None:
+                if hasattr(layer, 'bias') and layer.bias is not None:
                     print(f"  BatchNorm bias shape: {layer.bias.shape}")
 
             # For flatten layer
-            if hasattr(layer, "start_dim") and hasattr(layer, "end_dim"):
+            if hasattr(layer, 'start_dim') and hasattr(layer, 'end_dim'):
                 print(f"  Flatten dims: {layer.start_dim} to {layer.end_dim}")
 
+    # Switch to HE mode and see what operations Orion would do
     print("\n🔄 Switching to HE mode...")
     model.he()
 
@@ -144,9 +156,9 @@ def main():
     total_diagonals = 0
     total_rotations = 0
     for name, layer in model.named_modules():
-        if hasattr(layer, "diagonals") and layer.diagonals:
+        if hasattr(layer, 'diagonals') and layer.diagonals:
             total_diagonals += len(layer.diagonals)
-        if hasattr(layer, "output_rotations"):
+        if hasattr(layer, 'output_rotations'):
             total_rotations += layer.output_rotations
 
     print(f"Total diagonals across all layers: {total_diagonals}")
@@ -157,7 +169,6 @@ def main():
     print("=" * 40)
 
     from src.orion_heir.frontends.orion.orion_frontend import OrionFrontend
-
     frontend = OrionFrontend()
 
     operations = frontend.extract_operations(model)
@@ -166,8 +177,8 @@ def main():
     for i, op in enumerate(operations):
         print(f"  {i+1:2d}. {op.op_type:15} -> {op.result_var}")
         if op.metadata:
-            desc = op.metadata.get("operation", "")
-            layer = op.metadata.get("layer", "")
+            desc = op.metadata.get('operation', '')
+            layer = op.metadata.get('layer', '')
             if desc:
                 print(f"      {'':15}    ↳ {desc} ({layer})")
 
@@ -177,7 +188,7 @@ def main():
 
     layer_ops = {}
     for op in operations:
-        layer = op.metadata.get("layer", "unknown")
+        layer = op.metadata.get('layer', 'unknown')
         if layer not in layer_ops:
             layer_ops[layer] = []
         layer_ops[layer].append(op.op_type)
@@ -191,7 +202,7 @@ def main():
             print(f"  - {op_type}: {count}")
 
     # Now translate to MLIR
-    print("\n🔄 Translating to HEIR MLIR...")
+    print(f"\n🔄 Translating to HEIR MLIR...")
     from src.orion_heir import GenericTranslator
 
     from src.orion_heir.frontends.orion.scheme_params import OrionSchemeParameters
@@ -203,8 +214,8 @@ def main():
         logScale=26,
         slots=4096,
         ring_degree=8192,
-        backend="lattigo",
-        require_orion=True,
+        backend='lattigo',
+        require_orion=True
     )
     translator = GenericTranslator()
     module = translator.translate(operations, scheme_params, "mlp")
@@ -233,3 +244,5 @@ def main():
 
 if __name__ == "__main__":
     exit(main())
+
+
