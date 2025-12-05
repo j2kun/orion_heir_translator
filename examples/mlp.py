@@ -1,18 +1,19 @@
 from pathlib import Path
 import orion
-import orion.nn as nn
+import orion.nn as on
 import torch
+import torch.nn as nn
 
 
-class MLP(nn.Module):
+class MLP(on.Module):
     def __init__(self):
         super(MLP, self).__init__()
         # Flatten input is handled in forward, layers defined here
-        self.fc1 = nn.Linear(784, 512)  # Input to Hidden 1
-        self.fc2 = nn.Linear(512, 512)  # Hidden 1 to Hidden 2
-        self.fc3 = nn.Linear(512, 10)  # Hidden 2 to Output
+        self.fc1 = on.Linear(784, 512)  # Input to Hidden 1
+        self.fc2 = on.Linear(512, 512)  # Hidden 1 to Hidden 2
+        self.fc3 = on.Linear(512, 10)  # Hidden 2 to Output
         self.dropout = nn.Dropout(0.2)  # Standard regularization
-        self.relu = nn.ReLU()  # Standard activation
+        self.relu = on.ReLU()  # Standard activation
 
     def forward(self, x):
         # Flatten image: (Batch_Size, 1, 28, 28) -> (Batch_Size, 784)
@@ -20,11 +21,12 @@ class MLP(nn.Module):
 
         # Layer 1
         x = self.relu(self.fc1(x))
-        x = self.dropout(x)
+        # Orion fails to handle dropout, even in eval mode
+        # x = self.dropout(x)
 
         # Layer 2
         x = self.relu(self.fc2(x))
-        x = self.dropout(x)
+        # x = self.dropout(x)
 
         # Output Layer (Raw logits, CrossEntropyLoss handles Softmax)
         x = self.fc3(x)
