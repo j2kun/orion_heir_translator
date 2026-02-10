@@ -351,6 +351,27 @@ class RescaleOp(IRDLOperation):
 
     assembly_format = "$input attr-dict `:` type($input) `->` type($result)"
 
+@irdl_op_definition
+class LevelReduce(IRDLOperation):
+    """
+    Lower the modulus level of the ciphertext.
+
+    Example: %red = ckks.level_reduce %ct { levelToDrop = 1 } : !ct_tensor
+    """
+
+    name = "ckks.level_reduce"
+
+    input = operand_def(LWECiphertextType)
+    result = result_def(LWECiphertextType)
+
+    levelToDrop = prop_def(IntegerAttr)
+
+    traits = traits_def(Pure())
+    irdl_options = [ParsePropInAttrDict()]
+
+    # Now the result type can be inferred from the input type
+    assembly_format = "$input attr-dict `:` type($input) `->` type($result)"
+
 
 @irdl_op_definition
 class RotateOp(IRDLOperation):
