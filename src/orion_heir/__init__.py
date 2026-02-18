@@ -12,6 +12,9 @@ from src.orion_heir.core.types import FHEOperation
 from src.orion_heir.frontends.orion.orion_frontend import OrionFrontend
 from src.orion_heir.frontends.orion.scheme_params import OrionSchemeParameters
 
+from src.orion_heir.frontends.halo.halo_frontend import HaloFrontend
+from src.orion_heir.frontends.halo.scheme_parameters import HaloSchemeParameters
+
 # Import CKKS interpreter components
 try:
     from src.orion_heir.ckks_interpreter import (
